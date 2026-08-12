@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Step 2: Interactive Place Value Discovery</title>
+  <style>
+    :root {
+      --primary: #004080;
+      --primary-light: #d1e5f7;
+      --accent: #ffcc00;
+      --success: #28a745;
+      --danger: #dc3545;
+      --bg: #f4f9ff;
+      --card-bg: #ffffff;
+      --text: #222222;
+      --border: #cccccc;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: var(--primary);
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .instructions {
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    /* Challenge Selector Tabs */
+    .challenge-tabs {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: #e9ecef;
+      color: #495057;
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Challenge Box */
+    .challenge-box {
+      background: #eef6fc;
+      border-left: 4px solid var(--primary);
+      padding: 12px 16px;
+      border-radius: 0 4px 4px 0;
+      margin-bottom: 20px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Place Value Grid */
+    .pv-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      margin-bottom: 20px;
+      border: 2px solid var(--primary);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .period-header {
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: bold;
+      text-align: center;
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    .period-thousands { grid-column: span 3; }
+    .period-units { grid-column: span 3; border-left: 2px solid #ffffff; }
+
+    .place-header {
+      background: var(--primary-light);
+      color: #002244;
+      font-size: 11px;
+      font-weight: bold;
+      text-align: center;
+      padding: 8px 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+    }
+
+    .digit-cell {
+      background: #ffffff;
+      padding: 10px 4px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    .digit-cell select {
+      width: 100%;
+      max-width: 60px;
+      padding: 6px 2px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: #fafafa;
+      cursor: pointer;
+    }
+
+    .digit-cell select:disabled {
+      background: #eef2f5;
+      color: #333;
+      cursor: not-allowed;
+      border-color: #cbd5e1;
+    }
+
+    .value-label {
+      font-size: 11px;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    /* Partial Fill Section */
+    .partial-section {
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-title {
+      font-weight: bold;
+      color: var(--primary);
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .fill-sentence {
+      font-size: 15px;
+      line-height: 2.2;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      padding: 12px;
+      border-radius: 4px;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: bold;
+    }
+
+    .inline-input {
+      width: 90px;
+      padding: 4px 6px;
+      font-size: 15px;
+      border: 2px solid var(--primary);
+      border-radius: 4px;
+      text-align: center;
+      font-family: inherit;
+      font-weight: bold;
+      color: var(--primary);
+      background-color: #fffde7;
+    }
+
+    .inline-input:focus {
+      outline: none;
+      background-color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    .static-text {
+      color: #333333;
+    }
+
+    .btn-container {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .check-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .check-btn:hover {
+      background: #002d5a;
+    }
+
+    .feedback {
+      font-weight: bold;
+      font-size: 13px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .feedback.correct {
+      color: var(--success);
+      display: block;
+    }
+
+    .feedback.incorrect {
+      color: var(--danger);
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>✏️ Step 2: Interactive Place Value Discovery</h2>
+  <p class="instructions">We started the chart and math sentence for you! Fill in the missing pieces to complete each number.</p>
+
+  <!-- CHALLENGE TABS -->
+  <div class="challenge-tabs">
+    <button class="tab-btn active" onclick="loadChallenge(1)">Task 1</button>
+    <button class="tab-btn" onclick="loadChallenge(2)">Task 2</button>
+    <button class="tab-btn" onclick="loadChallenge(3)">Task 3</button>
+  </div>
+
+  <!-- CHALLENGE PROMPT -->
+  <div class="challenge-box" id="challenge-desc">
+    Loading challenge...
+  </div>
+
+  <!-- INTERACTIVE GRID -->
+  <div class="pv-grid">
+    <div class="period-header period-thousands">Thousands Period</div>
+    <div class="period-header period-units">Units Period</div>
+
+    <div class="place-header">Hundred<br>Thousands</div>
+    <div class="place-header">Ten<br>Thousands</div>
+    <div class="place-header">One<br>Thousands</div>
+    <div class="place-header">Hundreds</div>
+    <div class="place-header">Tens</div>
+    <div class="place-header">Ones</div>
+
+    <!-- Chart cells: some locked, some interactive based on task -->
+    <div class="digit-cell">
+      <select id="d5" onchange="updateChart()"></select>
+      <div class="value-label" id="v5">0</div>
+    </div>
+    <div class="digit-cell">
+      <select id="d4" onchange="updateChart()"></select>
+      <div class="value-label" id="v4">0</div>
+    </div>
+    <div class="digit-cell">
+      <select id="d3" onchange="updateChart()"></select>
+      <div class="value-label" id="v3">0</div>
+    </div>
+    <div class="digit-cell">
+      <select id="d2" onchange="updateChart()"></select>
+      <div class="value-label" id="v2">0</div>
+    </div>
+    <div class="digit-cell">
+      <select id="d1" onchange="updateChart()"></select>
+      <div class="value-label" id="v1">0</div>
+    </div>
+    <div class="digit-cell">
+      <select id="d0" onchange="updateChart()"></select>
+      <div class="value-label" id="v0">0</div>
+    </div>
+  </div>
+
+  <!-- PARTIAL FILL-IN WORKSPACE -->
+  <div class="partial-section">
+    <div class="form-title">Complete the Expanded Form Equation:</div>
+    <div class="fill-sentence" id="sentence-container">
+      <!-- Dynamic sentence elements inserted by JS -->
+    </div>
+
+    <div class="btn-container">
+      <button class="check-btn" onclick="checkAnswers()">Check Work</button>
+    </div>
+    <div class="feedback" id="feedback-msg"></div>
+  </div>
+</div>
+
+<script>
+  // Populate dropdown options (0-9)
+  for (let i = 0; i < 6; i++) {
+    let select = document.getElementById('d' + i);
+    for (let d = 0; d <= 9; d++) {
+      let opt = document.createElement('option');
+      opt.value = d;
+      opt.innerText = d;
+      select.appendChild(opt);
+    }
+  }
+
+  const multipliers = [1, 10, 100, 1000, 10000, 100000];
+
+  /*
+    Task Definitions:
+    - lockedDigits: map of index -> pre-filled value that is locked. Unmapped indices are student-chosen via dropdown.
+    - sentenceTemplate: Array of items. Strings are static text, objects `{ id, answer }` are fill-in inputs.
+  */
+  const tasks = {
+    1: {
+      desc: "<strong>Task 1 (Target: 604,291):</strong> Most of the chart is set! Pick the missing digit in the <strong>Ones place</strong>, then fill in the missing numbers in the equation.",
+      lockedDigits: { 5: 6, 4: 0, 3: 4, 2: 2, 1: 9 }, // d0 is selectable
+      sentenceTemplate: [
+        { type: 'static', text: '600,000 + ' },
+        { type: 'input', id: 'in1', answer: '4000' },
+        { type: 'static', text: ' + 200 + ' },
+        { type: 'input', id: 'in2', answer: '90' },
+        { type: 'static', text: ' + 1 = 604,291' }
+      ]
+    },
+    2: {
+      desc: "<strong>Task 2 (Target: 730,245):</strong> Set the missing digit in the <strong>Ten Thousands place</strong>. Then complete the expanded form sentence below.",
+      lockedDigits: { 5: 7, 3: 0, 2: 2, 1: 4, 0: 5 }, // d4 (Ten Thousands) is selectable
+      sentenceTemplate: [
+        { type: 'input', id: 'in1', answer: '700000' },
+        { type: 'static', text: ' + 30,000 + 200 + ' },
+        { type: 'input', id: 'in2', answer: '40' },
+        { type: 'static', text: ' + 5 = 730,245' }
+      ]
+    },
+    3: {
+      desc: "<strong>Task 3 (Target: 500,080):</strong> Set the missing digit in the <strong>Hundred Thousands place</strong>. Watch out for zeros, and fill in the missing value!",
+      lockedDigits: { 4: 0, 3: 0, 2: 0, 1: 8, 0: 0 }, // d5 (Hundred Thousands) is selectable
+      sentenceTemplate: [
+        { type: 'input', id: 'in1', answer: '500000' },
+        { type: 'static', text: ' + ' },
+        { type: 'input', id: 'in2', answer: '80' },
+        { type: 'static', text: ' = 500,080' }
+      ]
+    }
+  };
+
+  let currentTask = 1;
+
+  function loadChallenge(num) {
+    currentTask = num;
+    let task = tasks[num];
+
+    // Style active tab
+    document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+      btn.classList.toggle('active', idx + 1 === num);
+    });
+
+    // Update prompt
+    document.getElementById('challenge-desc').innerHTML = task.desc;
+
+    // Reset feedback
+    let fb = document.getElementById('feedback-msg');
+    fb.className = 'feedback';
+    fb.innerText = '';
+
+    // Configure Chart Dropdowns (Lock pre-filled ones, enable interactive ones)
+    for (let i = 0; i < 6; i++) {
+      let select = document.getElementById('d' + i);
+      if (task.lockedDigits.hasOwnProperty(i)) {
+        select.value = task.lockedDigits[i];
+        select.disabled = true;
+      } else {
+        select.value = 0; // Default interactive slot to 0
+        select.disabled = false;
+      }
+    }
+    updateChart();
+
+    // Render Partial Sentence HTML
+    let container = document.getElementById('sentence-container');
+    container.innerHTML = '';
+
+    task.sentenceTemplate.forEach(item => {
+      if (item.type === 'static') {
+        let span = document.createElement('span');
+        span.className = 'static-text';
+        span.innerText = item.text;
+        container.appendChild(span);
+      } else if (item.type === 'input') {
+        let input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'inline-input';
+        input.id = item.id;
+        input.setAttribute('data-answer', item.answer);
+        input.placeholder = '___';
+        container.appendChild(input);
+      }
+    });
+  }
+
+  function updateChart() {
+    for (let i = 0; i < 6; i++) {
+      let val = parseInt(document.getElementById('d' + i).value) || 0;
+      document.getElementById('v' + i).innerText = (val * multipliers[i]).toLocaleString();
+    }
+  }
+
+  function cleanString(str) {
+    return str.replace(/\s+/g, '').replace(/,/g, '');
+  }
+
+  function checkAnswers() {
+    let task = tasks[currentTask];
+    let fb = document.getElementById('feedback-msg');
+    let allCorrect = true;
+
+    // 1. Check if student set the dropdown(s) correctly
+    for (let i = 0; i < 6; i++) {
+      if (!task.lockedDigits.hasOwnProperty(i)) {
+        // This was a student digit
+        let selectVal = document.getElementById('d' + i).value;
+        // Determine expected digit based on task target
+        let expectedDigit = getExpectedDigit(currentTask, i);
+        if (parseInt(selectVal) !== expectedDigit) {
+          allCorrect = false;
+        }
+      }
+    }
+
+    // 2. Check inline text inputs
+    let inputs = document.querySelectorAll('.inline-input');
+    inputs.forEach(inp => {
+      let userAns = cleanString(inp.value);
+      let expectedAns = cleanString(inp.getAttribute('data-answer'));
+      if (userAns !== expectedAns) {
+        allCorrect = false;
+      }
+    });
+
+    if (allCorrect) {
+      fb.className = 'feedback correct';
+      fb.innerText = '🎉 Perfect! You correctly set the place value chart and completed the expanded form!';
+    } else {
+      fb.className = 'feedback incorrect';
+      fb.innerText = '❌ Almost there! Double check your chart selection and the missing values in the equation.';
+    }
+  }
+
+  function getExpectedDigit(taskNum, index) {
+    // Expected digits for the interactive slots
+    if (taskNum === 1 && index === 0) return 1; // 604,291 -> ones place is 1
+    if (taskNum === 2 && index === 4) return 3; // 730,245 -> ten thousands place is 3
+    if (taskNum === 3 && index === 5) return 5; // 500,080 -> hundred thousands place is 5
+    return 0;
+  }
+
+  // Initialize Task 1 on load
+  loadChallenge(1);
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pen</title>
+  </head>
+  <body>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
